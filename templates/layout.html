@@ -1,0 +1,27 @@
+{{define "layout"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ChitChat</title>
+    <link href="../public/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../public/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body>
+{{ template "navbar" . }}
+
+<div class="container">
+
+    {{ template "content" . }}
+    <!--
+        跟在模板名字之后的.，代表了传递给被引用模板的数据，
+        这条语句除了会在这个位置引入navbar模板之外，还会将传递给layout模板的数据传递给navbar模板
+    -->
+
+</div> <!-- /container -->
+
+<script src="../public/js/jquery-2.1.1.min.js"></script>
+<script src="../public/js/bootstrap.min.js"></script>
+</body>
+</html>
+{{end}}

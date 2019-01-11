@@ -1,0 +1,94 @@
+go主要的几种模板动作
+条件动作 if
+迭代动作 range
+设置动作 with
+包含动作
+
+其实 . 也是一个动作，并且是最为重要的动作，它代表的是传递数据给模板的数据，而其他动作都是在处理数据，从而达到格式化和内容展示的目的
+
+
+
+条件动作
+{{if .}}
+    大于5
+{{else}}
+    小于5
+{{end}}
+
+
+迭代动作
+{{range array}}
+    <li>{{.}}</li>
+{{end}}
+
+{{range .}}
+    <li>{{.}}</li>
+{{else}}  //添加了一个备选结果
+    <li>数据为空</li>
+{{end}}
+
+
+设置动作
+{{with arg}}
+    Dot is set to arg
+{{else}}
+    备选方案
+{{end}}
+
+
+包含动作
+允许用户在一个模板里面包含另一个模板，从而构建出嵌套模板
+格式：{{template "name" .}} 其中那么参数是被包含的模板的名字 这里的. 是主模板传递给嵌套模板的数据
+
+
+参数，变量，管道
+func templateArgument(w http.ResponseWriter,r *http.Request){
+	t,_ := template.ParseFiles("argument.html")
+	daysOfWeek := map[string]string{"name":"he","age":"18","sex":"男"}
+	t.Execute(w,daysOfWeek)
+}
+{{range $key,$value := .}}
+    这是key:{{$key}},
+    这是value:{{$value}}
+{{end}}
+
+{{12.3456 | printf "%.2f"}}  //管道，printf方法会对前面的数据格式化，保存两位小数点，返回结果12.34
+
+自定义函数：
+go的模板引擎函数都是受限制的：尽管这些函数可以接受任意多个参数作为输入，但他们只能返回一个值，或者返回一个值和一个错误
+为创建一个自定义的模板函数，用户需要：
+1.创建一个名为FuncMap的映射，并将映射的键设置为函数的名字，而映射的值则设置为实际定义的函数
+2.将FuncMap与模板进行绑定
+
+注意：在调用ParseFiles函数时，如果用户没有为模板文件中的模板定义名字，那么函数将使用模板文件的名字作为模板的名字
+在调用New函数创建新模板的时候，用户必须掺入一个模板名字，如果用户给定的模板名字跟前面分析模板时通过文件名提取的模板名字不相同
+，那么程序将返回一个错误
+
+通过管道的方式使用自定义函数  {{.|fdate}}
+通过传递参数的方式使用自定义函数{{fdate .}}
+
+注意：管道比直接调用函数强大和灵活的多，如果用户定义了多个函数，那么他就可以通过管道将一个函数的输出传递给另一个函数作为输入
+
+
+上下文感知：可以根据内容所处的上下文改变其显示的内容
+用途：对被显示的内容实施正确的转义，这意味着，如果模板显示的是HTML格式的内容，那么模板将对其实施html转义，如果模板显示的是javascript
+格式的内容，那么模板将对javascript格式内容进行转义，除此之外，go模板引擎还可以识别出内容中URL或者CSS
+
+
+嵌套模板：
+func templateNow(w http.ResponseWriter,r *http.Request){
+	rand.Seed(time.Now().Unix())
+	var t *template.Template
+	if rand.Intn(10) > 5 {
+		t,_ = template.ParseFiles("layout.html","red_hello.html")
+	}else{
+		t,_ = template.ParseFiles("layout.html","bule_hello.html")
+	}
+	t.ExecuteTemplate(w,"layout","")
+}
+
+
+块动作定义模板
+{{block arg}}
+    Dot is set to arg
+{{end}}
